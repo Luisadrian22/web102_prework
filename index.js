@@ -106,10 +106,10 @@ function filterUnfundedOnly() {
     deleteChildElements(gamesContainer);
 
     // use filter() to get a list of games that have not yet met their goal
-
+    const unfunded = GAMES_JSON.filter((games) => games.pledged < games.goal);
 
     // use the function we previously created to add the unfunded games to the DOM
-
+    addGamesToPage(unfunded);
 }
 
 // show only games that are fully funded
@@ -117,10 +117,10 @@ function filterFundedOnly() {
     deleteChildElements(gamesContainer);
 
     // use filter() to get a list of games that have met or exceeded their goal
-
+    const funded = GAMES_JSON.filter((games) => games.pledged > games.goal);
 
     // use the function we previously created to add unfunded games to the DOM
-
+    addGamesToPage(funded);
 }
 
 // show all games
@@ -128,7 +128,7 @@ function showAllGames() {
     deleteChildElements(gamesContainer);
 
     // add all games from the JSON data to the DOM
-
+    addGamesToPage(GAMES_JSON);
 }
 
 // select each button in the "Our Games" section
@@ -137,7 +137,9 @@ const fundedBtn = document.getElementById("funded-btn");
 const allBtn = document.getElementById("all-btn");
 
 // add event listeners with the correct functions to each button
-
+unfundedBtn.addEventListener("click",filterUnfundedOnly);
+fundedBtn.addEventListener("click",filterFundedOnly);
+allBtn.addEventListener("click",showAllGames);
 
 /*************************************************************************************
  * Challenge 6: Add more information at the top of the page about the company.
@@ -148,13 +150,26 @@ const allBtn = document.getElementById("all-btn");
 const descriptionContainer = document.getElementById("description-container");
 
 // use filter or reduce to count the number of unfunded games
+const unfunded = GAMES_JSON.filter((games) => games.pledged < games.goal);
 
+const numberUnfunded = unfunded.reduce(
+    (accumulator, item) => accumulator + 1, 0
+  );
+
+  const funded = GAMES_JSON.filter((games) => games.pledged > games.goal);
+
+const numberfunded = funded.reduce(
+    (accumulator, item) => accumulator + 1, 0
+  );
 
 // create a string that explains the number of unfunded games using the ternary operator
-
+const displayStr = `A total of $${amountRaised.toLocaleString('en-US')} has been raised for ${GAMES_JSON.length} games.
+Currently, ${numberUnfunded === 1 ? "1 game" : `${numberUnfunded} games`} remains unfunded. We need your help to fund these amazing games! `
 
 // create a new DOM element containing the template string and append it to the description container
-
+const paragraph = document.createElement("p");
+paragraph.innerHTML = displayStr;
+descriptionContainer.appendChild(paragraph);
 /************************************************************************************
  * Challenge 7: Select & display the top 2 games
  * Skills used: spread operator, destructuring, template literals, sort 
@@ -163,12 +178,46 @@ const descriptionContainer = document.getElementById("description-container");
 const firstGameContainer = document.getElementById("first-game");
 const secondGameContainer = document.getElementById("second-game");
 
+firstGameContainer.classList.add("top-game-container");
+secondGameContainer.classList.add("top-game-container");
+
 const sortedGames =  GAMES_JSON.sort( (item1, item2) => {
     return item2.pledged - item1.pledged;
 });
 
 // use destructuring and the spread operator to grab the first and second games
+const [firstGame, secondGame, ...remainingGames] = sortedGames;
+console.log(firstGame.name)
+console.log(secondGame.name)
 
 // create a new element to hold the name of the top pledge game, then append it to the correct element
+const firstGameElement = document.createElement('p');
+firstGameElement.textContent = `${firstGame.name}`;
+firstGameContainer.appendChild(firstGameElement)
 
 // do the same for the runner up item
+const secondGameGameElement = document.createElement('p');
+secondGameGameElement.textContent = `${secondGame.name}`;
+secondGameContainer.appendChild(secondGameGameElement)
+
+/* Customization */
+const searchInput = document.getElementById("searchInput");
+
+// show only games that do not yet have enough funding
+function searchGames() {
+    deleteChildElements(gamesContainer);
+
+    // use filter() to get a list of games that have not yet met their goal    
+    let games = GAMES_JSON.filter(game => game.name.toLowerCase().includes(searchInput.value.toLowerCase()));
+        
+    console.log(games)
+    console.log(searchInput.value)
+    
+    // use the function we previously created to add the unfunded games to the DOM
+    addGamesToPage(games)
+
+}
+
+
+// Add an event listener to handle input changes
+searchInput.addEventListener("input", searchGames);
